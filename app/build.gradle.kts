@@ -1,11 +1,21 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    alias(libs.plugins.pluginSerialization)
+    alias(libs.plugins.kspTool)
+    alias(libs.plugins.hiltGradlePlugin)
 }
 
 android {
     namespace = "com.daisy.foodorder"
     compileSdk = 34
+
+    val apikeyPropertiesFile = rootProject.file("app/apikey.properties")
+    val apikeyProperties = Properties()
+    apikeyProperties.load(FileInputStream(apikeyPropertiesFile))
 
     defaultConfig {
         applicationId = "com.daisy.foodorder"
@@ -18,6 +28,8 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        buildConfigField("String", "API_KEY", apikeyProperties["API_KEY"].toString())
     }
 
     buildTypes {
@@ -38,6 +50,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -69,4 +82,14 @@ dependencies {
 
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
+    ksp(libs.hilt.compiler)
+
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.android)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.ktor.logging)
+
+    implementation(libs.viewmodel.compose)
+    implementation(libs.viewmodel.ktx)
 }

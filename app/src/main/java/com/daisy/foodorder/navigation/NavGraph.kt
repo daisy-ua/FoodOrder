@@ -7,7 +7,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.daisy.foodorder.navigation.AppDestination.PRODUCT_SELECTION
 import com.daisy.foodorder.navigation.AppDestination.PRODUCT_CONFIGURATION
-import com.daisy.foodorder.ui.theme.screen.ProductSelectionScreen
+import com.daisy.foodorder.ui.screen.ProductSelectionScreen
 
 @Composable
 fun NavGraph(

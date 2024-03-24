@@ -1,4 +1,4 @@
-package com.daisy.foodorder.ui.theme.screen
+package com.daisy.foodorder.ui.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

@@ -1,5 +1,6 @@
-package com.daisy.foodorder.ui.theme.screen
+package com.daisy.foodorder.ui.screen
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -11,25 +12,36 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.daisy.foodorder.BuildConfig
 import com.daisy.foodorder.ui.component.BasketIconButton
 import com.daisy.foodorder.ui.component.MainTopAppBar
 import com.daisy.foodorder.ui.component.product.ProductPreview
 import com.daisy.foodorder.ui.theme.FoodOrderTheme
+import com.daisy.foodorder.viewmodels.ProductSelectionViewModel
 
 @Composable
 fun ProductSelectionScreen(
     onItemClick: (Long) -> Unit,
+    viewModel: ProductSelectionViewModel = hiltViewModel<ProductSelectionViewModel>()
 ) {
+//    val products by viewModel.products.collectAsState()
+
     Scaffold(
         topBar = {
             MainTopAppBar(
                 title = "FoodOrder",
                 actions = {
-                    BasketIconButton { }
+                    BasketIconButton { 
+                        viewModel.getCategories()
+                    }
                 })
         }
     ) {
@@ -75,6 +87,6 @@ fun ChipChain(modifier: Modifier) {
 @Preview(showBackground = true)
 fun ProductSelectionScreenPreview() {
     FoodOrderTheme(darkTheme = false) {
-        ProductSelectionScreen({})
+//        ProductSelectionScreen({})
     }
 }
