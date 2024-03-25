@@ -10,18 +10,29 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun QuantitySelector() {
+fun QuantitySelector(
+    value: Int,
+    onLessClicked: () -> Unit,
+    onMoreClicked: () -> Unit,
+    valueRange: IntRange = 0..5
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        AddLessButton({})
+        AddLessButton(
+            onClick = onLessClicked,
+            enabled = value > valueRange.first
+        )
 
         Text(
-            text = "0",
+            text = value.toString(),
             style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
 
-        AddMoreButton({})
+        AddMoreButton(
+            onClick = onMoreClicked,
+            enabled = value < valueRange.last
+        )
     }
 }

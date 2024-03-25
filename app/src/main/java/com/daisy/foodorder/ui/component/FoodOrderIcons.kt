@@ -44,16 +44,18 @@ fun BackIconButton(onClick: () -> Unit) {
 @Composable
 fun AddLessButton(
     onClick: () -> Unit,
+    enabled: Boolean = true,
     size: Dp = 34.dp,
     color: Color = MaterialTheme.colorScheme.primary
 ) {
     OutlinedButton(
         modifier = Modifier.size(size),
+        enabled = enabled,
         shape = CircleShape,
         contentPadding = PaddingValues(0.dp),
         border = BorderStroke(1.dp, color),
         colors = ButtonDefaults.outlinedButtonColors(contentColor = color),
-        onClick = { onClick() },
+        onClick = onClick,
     ) {
         Icon(
             imageVector = Icons.Default.KeyboardArrowDown,
@@ -66,16 +68,18 @@ fun AddLessButton(
 @Composable
 fun AddMoreButton(
     onClick: () -> Unit,
+    enabled: Boolean = true,
     size: Dp = 34.dp,
     color: Color = MaterialTheme.colorScheme.primary
 ) {
     OutlinedButton(
         modifier = Modifier.size(size),
+        enabled = enabled,
         shape = CircleShape,
         contentPadding = PaddingValues(0.dp),
         border = BorderStroke(1.dp, color),
         colors = ButtonDefaults.outlinedButtonColors(contentColor = color),
-        onClick = { onClick() },
+        onClick = onClick,
     ) {
         Icon(
             imageVector = Icons.Default.KeyboardArrowUp,

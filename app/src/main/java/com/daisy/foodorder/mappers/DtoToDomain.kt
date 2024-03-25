@@ -18,6 +18,6 @@ fun ProductDto.toDomain() =
         currency
     )
 
-fun IngredientDto.toDomain() = Ingredient(id, name, price, currency)
+fun IngredientDto.toDomain() = Ingredient(id, name, price, 0, currency)
 
 fun ProductTypeDto.toDomain() = ProductType(name)

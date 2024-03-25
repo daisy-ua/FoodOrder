@@ -51,7 +51,7 @@ fun NavGraph(
             ProductConfigurationScreen(
                 name = name,
                 price = price,
-                onUpClick = { actions.navigateUp }
+                onUpClick = { actions.navigateUp(navBackStackEntry) }
             )
         }
     }

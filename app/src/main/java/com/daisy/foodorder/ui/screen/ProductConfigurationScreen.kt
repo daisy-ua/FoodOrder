@@ -1,6 +1,5 @@
 package com.daisy.foodorder.ui.screen
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -27,6 +27,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.daisy.foodorder.domain.Defaults
+import com.daisy.foodorder.domain.Ingredient
 import com.daisy.foodorder.domain.Product
 import com.daisy.foodorder.ui.component.BackIconButton
 import com.daisy.foodorder.ui.component.BasketIconButton
@@ -47,6 +49,10 @@ fun ProductConfigurationScreen(
     }
 
     val productDetails by viewModel.productDetails.collectAsState()
+    val shouldShowSuccess by viewModel.isDataLoaded.collectAsState()
+    val ingredients by viewModel.extraIngredients.collectAsState()
+    val productQuantity by viewModel.productQuantity.collectAsState()
+    val totalCost by viewModel.totalCost.collectAsState()
 
     Scaffold(
         topBar = {
@@ -60,25 +66,47 @@ fun ProductConfigurationScreen(
                 })
         }
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            LazyColumn(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(it)
+        if (shouldShowSuccess) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
-                item {
-                    ProductInfo(productDetails)
+                LazyColumn(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(it)
+                ) {
+                    item {
+                        ProductInfo(productDetails!!)
+                    }
+
+                    items(
+                        items = ingredients,
+                        key = { item -> item.id }
+                    ) { ingredient ->
+                        ExtraIngredientItem(
+                            ingredient = ingredient,
+                            onLessClicked = {
+                                viewModel.addLessIngredient(ingredient.id)
+                            },
+                            onMoreClicked = {
+                                viewModel.addMoreIngredient(ingredient.id)
+                            })
+                    }
                 }
 
-                items(3) {
-                    ExtraIngredientItem()
-                }
+                CheckoutSummaryBottomBar(
+                    totalCost = totalCost,
+                    quantity = productQuantity,
+                    onAddToCartClick = {},
+                    onLessClicked = {
+                        viewModel.addLessProductQuantity()
+                    },
+                    onMoreClicked = {
+                        viewModel.addMoreProductQuantity()
+                    }
+                )
             }
-
-            CheckoutSummaryBottomBar({})
         }
     }
 }
@@ -120,6 +148,7 @@ fun ProductInfo(
         Text(
             text = product.description,
             style = MaterialTheme.typography.bodyMedium,
+            maxLines = 4,
             color = MaterialTheme.colorScheme.onBackground.copy(.6f),
             modifier = Modifier.padding(bottom = 8.dp)
         )
@@ -133,7 +162,11 @@ fun ProductInfo(
 }
 
 @Composable
-fun ExtraIngredientItem() {
+fun ExtraIngredientItem(
+    ingredient: Ingredient,
+    onLessClicked: () -> Unit,
+    onMoreClicked: () -> Unit,
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -144,20 +177,30 @@ fun ExtraIngredientItem() {
         Column(
             modifier = Modifier.fillMaxWidth(.6f)
         ) {
-            Text(text = "Parmesan", maxLines = 1)
+            Text(text = ingredient.name, maxLines = 1)
             Text(
-                text = "+$2.00",
+                text = "+$${ingredient.price}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.primary
             )
         }
 
-        QuantitySelector()
+        QuantitySelector(
+            value = ingredient.quantity,
+            onLessClicked = onLessClicked,
+            onMoreClicked = onMoreClicked
+        )
     }
 }
 
 @Composable
-fun CheckoutSummaryBottomBar(onClick: () -> Unit) {
+fun CheckoutSummaryBottomBar(
+    totalCost: Double,
+    quantity: Int,
+    onAddToCartClick: () -> Unit,
+    onLessClicked: () -> Unit,
+    onMoreClicked: () -> Unit,
+) {
     Card(
         elevation = CardDefaults.cardElevation(4.dp),
         shape = RoundedCornerShape(0.dp),
@@ -170,10 +213,15 @@ fun CheckoutSummaryBottomBar(onClick: () -> Unit) {
                 .background(MaterialTheme.colorScheme.background)
                 .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
-            QuantitySelector()
+            QuantitySelector(
+                value = quantity,
+                onLessClicked = onLessClicked,
+                onMoreClicked = onMoreClicked,
+                valueRange = Defaults.PRODUCT_QUANTITY_RANGE
+            )
 
-            Button(onClick = { onClick() }) {
-                Text("ADD TO CART ($24.00)")
+            Button(onClick = { onAddToCartClick() }) {
+                Text("ADD TO CART ($$totalCost)")
             }
         }
     }

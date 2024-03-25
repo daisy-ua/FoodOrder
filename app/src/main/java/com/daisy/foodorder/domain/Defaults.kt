@@ -1,13 +1,7 @@
 package com.daisy.foodorder.domain
 
 object Defaults {
-    val DEFAULT_PRODUCT = Product(
-        id = 0,
-        name = "",
-        description = "",
-        type = "",
-        extraIngredients = emptyList(),
-        price = 0f,
-        currency = "",
-    )
+
+    val PRODUCT_QUANTITY_RANGE: IntRange = 1..5
+
 }

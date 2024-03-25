@@ -7,5 +7,7 @@ data class Ingredient(
 
     val price: Float,
 
+    val quantity: Int,
+
     val currency: String,
 )
