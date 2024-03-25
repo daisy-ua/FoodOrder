@@ -1,5 +1,13 @@
 package com.daisy.foodorder.domain
 
 data class ProductType(
-    val type: String,
-)
+    val key: String,
+
+    val displayString: String,
+) {
+
+    constructor(key: String) : this(
+        key = key,
+        displayString = key.replaceFirstChar(Char::titlecase)
+    )
+}

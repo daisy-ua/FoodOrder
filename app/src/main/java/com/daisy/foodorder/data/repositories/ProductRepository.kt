@@ -9,5 +9,7 @@ import kotlinx.coroutines.flow.Flow
 interface ProductRepository {
     fun getProducts(category: String): Flow<ApiResponse<List<Product>>>
 
+    fun getProduct(name: String, price: Float): Flow<ApiResponse<Product?>>
+
     fun getCategories(): Flow<ApiResponse<List<ProductType>>>
 }

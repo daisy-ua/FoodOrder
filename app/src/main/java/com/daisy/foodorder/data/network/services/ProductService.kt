@@ -11,5 +11,5 @@ interface ProductService {
         offset: Int = 0
     ): Flow<ApiResponse<List<ProductDto>>>
 
-    fun getProduct(id: Long): ProductDto
+    fun getProduct(name: String, price: Float): Flow<ApiResponse<ProductDto>>
 }

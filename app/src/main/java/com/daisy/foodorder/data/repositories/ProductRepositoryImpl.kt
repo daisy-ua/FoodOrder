@@ -1,6 +1,7 @@
 package com.daisy.foodorder.data.repositories
 
 import com.daisy.foodorder.data.ApiResponse
+import com.daisy.foodorder.data.network.models.ProductDto
 import com.daisy.foodorder.data.network.models.ProductTypeDto
 import com.daisy.foodorder.data.network.services.ProductCategoryService
 import com.daisy.foodorder.data.network.services.ProductService
@@ -9,10 +10,8 @@ import com.daisy.foodorder.domain.ProductType
 import com.daisy.foodorder.mappers.toDomain
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
-import kotlin.reflect.KFunction1
 
 class ProductRepositoryImpl @Inject constructor(
     private val productService: ProductService,
@@ -21,10 +20,15 @@ class ProductRepositoryImpl @Inject constructor(
 ) : ProductRepository {
     override fun getProducts(category: String): Flow<ApiResponse<List<Product>>> {
         return productService.getProducts(category)
+            .mapResponse(dispatcher, ProductDto::toDomain)
+    }
+
+    override fun getProduct(name: String, price: Float): Flow<ApiResponse<Product?>> {
+        return productService.getProduct(name.split(" ").first(), price)
             .map { response ->
                 when (response) {
                     is ApiResponse.Success -> {
-                        val data = response.data?.map { it.toDomain() } ?: emptyList()
+                        val data = response.data?.toDomain()
                         ApiResponse.Success(data)
                     }
 
@@ -38,7 +42,6 @@ class ProductRepositoryImpl @Inject constructor(
                     }
                 }
             }
-            .flowOn(dispatcher)
     }
 
     override fun getCategories(): Flow<ApiResponse<List<ProductType>>> {
@@ -47,25 +50,3 @@ class ProductRepositoryImpl @Inject constructor(
     }
 
 }
-
-private fun <In, Out> Flow<ApiResponse<List<In>>>.mapResponse(
-    dispatcher: CoroutineDispatcher,
-    mapper: KFunction1<In, Out>,
-) =
-    map { response ->
-        when (response) {
-            is ApiResponse.Success -> {
-                val data = response.data?.map { mapper(it) } ?: emptyList()
-                ApiResponse.Success(data)
-            }
-
-            is ApiResponse.Error -> {
-                val error = response.throwable ?: RuntimeException("Unknown error")
-                ApiResponse.Error(error)
-            }
-
-            is ApiResponse.Loading -> {
-                ApiResponse.Loading()
-            }
-        }
-    }.flowOn(dispatcher)

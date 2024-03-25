@@ -1,5 +1,6 @@
 package com.daisy.foodorder.ui.screen
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,18 +19,35 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.daisy.foodorder.domain.Product
 import com.daisy.foodorder.ui.component.BackIconButton
 import com.daisy.foodorder.ui.component.BasketIconButton
 import com.daisy.foodorder.ui.component.MainTopAppBar
 import com.daisy.foodorder.ui.component.QuantitySelector
 import com.daisy.foodorder.ui.theme.FoodOrderTheme
+import com.daisy.foodorder.viewmodels.ProductConfigurationViewModel
 
 @Composable
-fun ProductConfiguration() {
+fun ProductConfigurationScreen(
+    name: String,
+    price: Float,
+    onUpClick: () -> Unit,
+    viewModel: ProductConfigurationViewModel = hiltViewModel()
+) {
+    LaunchedEffect(key1 = name) {
+        viewModel.fetchDetails(name, price)
+    }
+
+    val productDetails by viewModel.productDetails.collectAsState()
+
     Scaffold(
         topBar = {
             MainTopAppBar(
@@ -38,7 +56,7 @@ fun ProductConfiguration() {
                     BasketIconButton { }
                 },
                 navigationAction = {
-                    BackIconButton { }
+                    BackIconButton { onUpClick() }
                 })
         }
     ) {
@@ -52,7 +70,7 @@ fun ProductConfiguration() {
                     .padding(it)
             ) {
                 item {
-                    ProductInfo()
+                    ProductInfo(productDetails)
                 }
 
                 items(3) {
@@ -66,7 +84,9 @@ fun ProductConfiguration() {
 }
 
 @Composable
-fun ProductInfo() {
+fun ProductInfo(
+    product: Product,
+) {
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         Box(
             modifier = Modifier
@@ -83,7 +103,7 @@ fun ProductInfo() {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "Burger",
+                text = product.name,
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier
                     .padding(vertical = 4.dp)
@@ -91,14 +111,14 @@ fun ProductInfo() {
             )
 
             Text(
-                text = "$12.00",
+                text = "$${product.price}",
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.primary
             )
         }
 
         Text(
-            text = "Dill pickle, cheddar cheese, tomato, red onion,",
+            text = product.description,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground.copy(.6f),
             modifier = Modifier.padding(bottom = 8.dp)
@@ -163,6 +183,6 @@ fun CheckoutSummaryBottomBar(onClick: () -> Unit) {
 @Preview(showBackground = true)
 fun ProductConfigurationPreview() {
     FoodOrderTheme(darkTheme = false) {
-        ProductConfiguration()
+//        ProductConfigurationScreen()
     }
 }
