@@ -2,6 +2,8 @@ package com.daisy.foodorder.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.daisy.foodorder.data.repositories.ProductRepository
+import com.daisy.foodorder.domain.Order
 import com.daisy.foodorder.domain.OrderItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -14,7 +16,9 @@ import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 @HiltViewModel
-class BasketViewModel @Inject constructor() : ViewModel() {
+class BasketViewModel @Inject constructor(
+    private val repository: ProductRepository,
+) : ViewModel() {
     private val _order: MutableStateFlow<List<OrderItem>> = MutableStateFlow(emptyList())
     val order: StateFlow<List<OrderItem>> get() = _order
 
@@ -37,6 +41,15 @@ class BasketViewModel @Inject constructor() : ViewModel() {
         val currentProducts = order.value.toMutableList()
         currentProducts.removeAt(index)
         _order.value = currentProducts
+    }
+
+    fun checkoutOrder() {
+        val orderCheckout = Order(
+            products = order.value,
+            totalCost = totalCost.value
+        )
+
+        repository.serializeOrder(orderCheckout)
     }
 
     private fun calculateTotalCost(order: List<OrderItem>): Float =

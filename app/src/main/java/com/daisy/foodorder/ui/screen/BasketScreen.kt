@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -54,7 +55,8 @@ fun BasketScreen(
                 modifier = Modifier.padding(it),
                 order = order,
                 totalCost = totalCost,
-                onRemoveClicked = viewModel::removeFromOrder
+                onRemoveClicked = viewModel::removeFromOrder,
+                onCheckoutClicked = viewModel::checkoutOrder
             )
         }
     }
@@ -66,6 +68,7 @@ fun BasketContent(
     order: List<OrderItem>,
     totalCost: Float,
     onRemoveClicked: (Int) -> Unit,
+    onCheckoutClicked: () -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -89,6 +92,7 @@ fun BasketContent(
 
         CheckoutCard(
             totalCost = totalCost,
+            onCheckoutClicked = onCheckoutClicked
         )
     }
 }
@@ -96,6 +100,7 @@ fun BasketContent(
 @Composable
 fun CheckoutCard(
     totalCost: Float,
+    onCheckoutClicked: () -> Unit,
 ) {
     Card(
         elevation = CardDefaults.cardElevation(4.dp),
@@ -104,13 +109,14 @@ fun CheckoutCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.background),
-            horizontalArrangement = Arrangement.End,
+                .background(MaterialTheme.colorScheme.background)
+                .padding(horizontal = 18.dp, vertical = 20.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Row(
                 modifier = Modifier
                     .background(MaterialTheme.colorScheme.background)
-                    .padding(horizontal = 18.dp, vertical = 20.dp)
             ) {
                 Text(
                     text = "Total:",
@@ -122,6 +128,10 @@ fun CheckoutCard(
                     text = "$$totalCost", style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onBackground,
                 )
+            }
+
+            Button(onClick = onCheckoutClicked) {
+                Text(text = "CHECKOUT")
             }
         }
     }
