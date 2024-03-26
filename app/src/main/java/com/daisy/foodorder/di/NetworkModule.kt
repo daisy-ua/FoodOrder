@@ -1,6 +1,5 @@
 package com.daisy.foodorder.di
 
-import android.util.Log
 import com.daisy.foodorder.BuildConfig
 import com.daisy.foodorder.data.network.services.ProductCategoryService
 import com.daisy.foodorder.data.network.services.ProductCategoryServiceImpl
@@ -14,8 +13,6 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.logging.LogLevel
-import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
@@ -32,14 +29,6 @@ object NetworkModule {
     @Provides
     fun provideHttpClient(): HttpClient {
         return HttpClient(Android) {
-            install(Logging) {
-                logger = object : io.ktor.client.plugins.logging.Logger {
-                    override fun log(message: String) {
-                        Log.d("daisy-ua", message)
-                    }
-                }
-                level = LogLevel.ALL
-            }
             install(DefaultRequest) {
                 url(BASE_URL)
                 header(HttpHeaders.ContentType, ContentType.Application.Json)

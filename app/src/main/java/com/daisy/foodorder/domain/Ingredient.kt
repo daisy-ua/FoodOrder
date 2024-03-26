@@ -11,3 +11,7 @@ data class Ingredient(
 
     val currency: String,
 )
+
+fun List<Ingredient>.totalCost() = sumOf { ingredient ->
+    (ingredient.price * ingredient.quantity).toDouble()
+}.toFloat()

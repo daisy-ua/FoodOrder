@@ -47,7 +47,7 @@ fun ProductPreview(
             )
 
             Text(
-                text = "$${item.price}",
+                text = "$${item.originalPrice}",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary
             )

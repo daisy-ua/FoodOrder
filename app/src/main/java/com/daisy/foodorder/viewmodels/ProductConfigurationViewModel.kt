@@ -6,7 +6,9 @@ import com.daisy.foodorder.data.ApiResponse
 import com.daisy.foodorder.data.repositories.ProductRepository
 import com.daisy.foodorder.domain.Defaults.PRODUCT_QUANTITY_RANGE
 import com.daisy.foodorder.domain.Ingredient
+import com.daisy.foodorder.domain.OrderItem
 import com.daisy.foodorder.domain.Product
+import com.daisy.foodorder.domain.totalCost
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,8 +39,6 @@ class ProductConfigurationViewModel @Inject constructor(
         MutableStateFlow(PRODUCT_QUANTITY_RANGE.first)
     val productQuantity: StateFlow<Int> get() = _productQuantity
 
-//    private val _totalSum: MutableStateFlow<Float> = MutableStateFlow(0f)
-
     val totalCost = combine(
         productDetails,
         extraIngredients,
@@ -49,12 +49,7 @@ class ProductConfigurationViewModel @Inject constructor(
             product != null
         }
         .map { (product, ingredients, quantity) ->
-            val price = product!!.price
-            val ingredientsCost = ingredients.sumOf { ingredient ->
-                (ingredient.price * ingredient.quantity).toDouble()
-            }
-
-            (price + ingredientsCost) * quantity
+            calculateTotalCost(product!!, ingredients, quantity)
         }
         .flowOn(Dispatchers.Default)
         .stateIn(
@@ -62,6 +57,20 @@ class ProductConfigurationViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(),
             initialValue = 0.0
         )
+
+    val configuredProduct: OrderItem
+        get() = productDetails.value?.let { product ->
+            OrderItem(
+                product = product.copy(
+                    extraIngredients = getSelectedIngredients(extraIngredients.value)
+                ),
+                quantity = productQuantity.value,
+                totalCost = totalCost.value.toFloat()
+            )
+        } ?: throw IllegalStateException("Product details must not be null")
+
+    private fun getSelectedIngredients(items: List<Ingredient>): List<Ingredient> =
+        items.filter { item -> item.quantity != 0 }
 
 
     fun fetchDetails(name: String, price: Float) = viewModelScope.launch {
@@ -77,34 +86,28 @@ class ProductConfigurationViewModel @Inject constructor(
             }
     }
 
-    fun addLessProductQuantity(adjustBy: Int = 1) {
-        updateProductQuantity(-adjustBy)
-    }
-
-    fun addMoreProductQuantity(adjustBy: Int = 1) {
-        updateProductQuantity(adjustBy)
-    }
-
-    fun addLessIngredient(id: Long, adjustBy: Int = 1) {
-        updateIngredientQuantity(id, -adjustBy)
-    }
-
-    fun addMoreIngredient(id: Long, adjustBy: Int = 1) {
-        updateIngredientQuantity(id, adjustBy)
-    }
-
-    private fun updateProductQuantity(adjustBy: Int) {
+    fun updateProductQuantity(adjustBy: Int) {
         _productQuantity.value += adjustBy
     }
 
-    private fun updateIngredientQuantity(id: Long, adjustBy: Int) {
-        val updatedIngredients = _extraIngredients.value.map { ingredient ->
-            if (ingredient.id == id) {
-                ingredient.copy(quantity = ingredient.quantity + adjustBy)
-            } else {
-                ingredient
-            }
+    fun updateIngredientQuantity(id: Long, adjustBy: Int) {
+        val index = _extraIngredients.value.indexOfFirst { it.id == id }
+        if (index != -1) {
+            val newList = _extraIngredients.value.toMutableList()
+            newList[index] = newList[index].copy(quantity = newList[index].quantity + adjustBy)
+            _extraIngredients.value = newList
         }
-        _extraIngredients.value = updatedIngredients
+    }
+
+    private fun calculateTotalCost(
+        product: Product,
+        ingredients: List<Ingredient>,
+        quantity: Int
+    ): Double {
+        val price = product.originalPrice
+        val ingredientsCost = ingredients.totalCost()
+
+        val totalCost = (price + ingredientsCost) * quantity
+        return String.format("%.2f", totalCost).toDouble()
     }
 }

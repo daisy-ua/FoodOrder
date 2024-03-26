@@ -89,23 +89,14 @@ class ProductSelectionViewModel @Inject constructor(
     }
 
     private fun fetchCategories() = viewModelScope.launch {
-//        productRepository.getCategories()
-//            .catch {
-//                _categoryResponse.value =
-//                    ApiResponse.Error(Throwable(it.message ?: "Something went wrong"))
-//                Log.d("daisy-ua", "error: ${it.message}")
-//            }
-//            .collect {
-//                _categoryResponse.value = it
-//            }
-        _categoryResponse.value = ApiResponse.Success(
-            listOf(
-                ProductType("pizza"),
-                ProductType("burger"),
-                ProductType("salad"),
-                ProductType("sandwich")
-            )
-        )
+        productRepository.getCategories()
+            .catch {
+                _categoryResponse.value =
+                    ApiResponse.Error(Throwable(it.message ?: "Something went wrong"))
+            }
+            .collect {
+                _categoryResponse.value = it
+            }
     }
 
 }

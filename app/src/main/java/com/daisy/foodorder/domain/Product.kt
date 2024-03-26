@@ -11,7 +11,7 @@ data class Product(
 
     val extraIngredients: List<Ingredient>,
 
-    val price: Float,
+    val originalPrice: Float,
 
     val currency: String,
 )

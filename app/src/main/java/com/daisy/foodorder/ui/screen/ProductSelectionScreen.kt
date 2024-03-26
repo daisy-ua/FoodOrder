@@ -30,6 +30,7 @@ import com.daisy.foodorder.viewmodels.ProductSelectionViewModel
 @Composable
 fun ProductSelectionScreen(
     onItemClick: (String, Float) -> Unit,
+    onBasketClicked: () -> Unit,
     viewModel: ProductSelectionViewModel = hiltViewModel<ProductSelectionViewModel>()
 ) {
     val categories by viewModel.categories.collectAsState()
@@ -41,7 +42,7 @@ fun ProductSelectionScreen(
             MainTopAppBar(
                 title = "FoodOrder",
                 actions = {
-                    BasketIconButton { }
+                    BasketIconButton(onBasketClicked)
                 })
         }
     ) {
@@ -62,7 +63,7 @@ fun ProductSelectionScreen(
                     key = { item -> item.id }
                 ) { product ->
                     ProductPreview(product) {
-                        onItemClick(product.name, product.price)
+                        onItemClick(product.name, product.originalPrice)
                     }
                 }
             }

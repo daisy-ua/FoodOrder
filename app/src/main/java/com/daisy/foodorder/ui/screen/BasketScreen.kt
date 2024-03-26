@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -16,36 +17,56 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.daisy.foodorder.domain.OrderItem
 import com.daisy.foodorder.ui.component.BackIconButton
 import com.daisy.foodorder.ui.component.MainTopAppBar
 import com.daisy.foodorder.ui.component.product.OrderProductPreview
 import com.daisy.foodorder.ui.theme.FoodOrderTheme
+import com.daisy.foodorder.viewmodels.BasketViewModel
 
 @Composable
-fun BasketScreen() {
+fun BasketScreen(
+    onUpClicked: () -> Unit,
+    viewModel: BasketViewModel,
+) {
+    val order by viewModel.order.collectAsState()
+    val totalCost by viewModel.totalCost.collectAsState()
+
     Scaffold(
         topBar = {
             MainTopAppBar(
                 title = "FoodOrder",
                 navigationAction = {
-                    BackIconButton { }
+                    BackIconButton(onUpClicked)
                 })
         }
     ) {
-        if (false) {
+        if (order.isEmpty()) {
             EmptyBasket()
         } else {
-            BasketContent(modifier = Modifier.padding(it))
+            BasketContent(
+                modifier = Modifier.padding(it),
+                order = order,
+                totalCost = totalCost,
+                onRemoveClicked = viewModel::removeFromOrder
+            )
         }
     }
 }
 
 @Composable
-fun BasketContent(modifier: Modifier) {
+fun BasketContent(
+    modifier: Modifier,
+    order: List<OrderItem>,
+    totalCost: Float,
+    onRemoveClicked: (Int) -> Unit,
+) {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.SpaceBetween
@@ -55,17 +76,27 @@ fun BasketContent(modifier: Modifier) {
                 .weight(1f)
                 .then(modifier),
         ) {
-            items(3) {
-                OrderProductPreview()
+            itemsIndexed(
+                items = order,
+                key = { _, item -> item.hashCode() }
+            ) { index, item ->
+                OrderProductPreview(
+                    orderItem = item,
+                    onRemoveClicked = { onRemoveClicked(index) }
+                )
             }
         }
 
-        CheckoutCard()
+        CheckoutCard(
+            totalCost = totalCost,
+        )
     }
 }
 
 @Composable
-fun CheckoutCard() {
+fun CheckoutCard(
+    totalCost: Float,
+) {
     Card(
         elevation = CardDefaults.cardElevation(4.dp),
         shape = RoundedCornerShape(0.dp),
@@ -88,7 +119,7 @@ fun CheckoutCard() {
                     color = MaterialTheme.colorScheme.onBackground,
                 )
                 Text(
-                    text = "$250.00", style = MaterialTheme.typography.titleMedium,
+                    text = "$$totalCost", style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onBackground,
                 )
             }
@@ -114,6 +145,6 @@ fun EmptyBasket() {
 @Preview(showBackground = true)
 fun BasketScreenPreview() {
     FoodOrderTheme(darkTheme = false) {
-        BasketScreen()
+//        BasketScreen()
     }
 }

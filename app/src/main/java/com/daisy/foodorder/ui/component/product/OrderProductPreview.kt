@@ -23,10 +23,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.daisy.foodorder.domain.Ingredient
+import com.daisy.foodorder.domain.OrderItem
 import com.daisy.foodorder.ui.theme.FoodOrderTheme
 
 @Composable
-fun OrderProductPreview() {
+fun OrderProductPreview(
+    orderItem: OrderItem,
+    onRemoveClicked: () -> Unit,
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(0.dp),
@@ -47,8 +52,9 @@ fun OrderProductPreview() {
 
             Column(
                 modifier = Modifier.padding(start = 16.dp),
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
-                ProductInfo()
+                ProductInfo(orderItem, modifier = Modifier.padding(end = 16.dp))
 
                 Row(
                     modifier = Modifier
@@ -57,7 +63,7 @@ fun OrderProductPreview() {
                     horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(
-                        onClick = { },
+                        onClick = onRemoveClicked,
                     ) {
                         Text(text = "Remove", color = Color.Red.copy(.7f))
                     }
@@ -68,8 +74,11 @@ fun OrderProductPreview() {
 }
 
 @Composable
-fun ProductInfo() {
-    Column(Modifier.padding(end = 16.dp)) {
+fun ProductInfo(
+    orderItem: OrderItem,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -78,13 +87,13 @@ fun ProductInfo() {
             verticalAlignment = Alignment.Top,
         ) {
             Text(
-                text = "Burger",
+                text = orderItem.product.name,
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground,
             )
 
             Text(
-                text = "$12.00",
+                text = "$${orderItem.totalCost}",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary,
             )
@@ -103,40 +112,47 @@ fun ProductInfo() {
             )
 
             Text(
-                text = "1",
+                text = orderItem.quantity.toString(),
                 style = MaterialTheme.typography.bodySmall,
                 fontWeight = FontWeight.Medium,
             )
         }
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "Extra",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onBackground.copy(.6f),
-                modifier = Modifier.weight(.3f)
-            )
+        if (orderItem.product.extraIngredients.isNotEmpty()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Extra",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onBackground.copy(.6f),
+                    modifier = Modifier.weight(.3f)
+                )
 
-            Text(
-                text = "Cheese x2, pepper x1, onions x3",
-                style = MaterialTheme.typography.bodySmall,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.weight(.65f),
-                textAlign = TextAlign.End
-            )
+                Text(
+                    text = ingredientsDisplayString(orderItem.product.extraIngredients),
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.weight(.65f),
+                    textAlign = TextAlign.End
+                )
+            }
         }
     }
 }
+
+private fun ingredientsDisplayString(items: List<Ingredient>): String =
+    items.joinToString(separator = ",\n") { item ->
+        "${item.name} x${item.quantity}"
+    }
 
 @Composable
 @Preview(showBackground = true)
 fun OrderProductPreviewPreview() {
     FoodOrderTheme(darkTheme = false) {
-        OrderProductPreview()
+//        OrderProductPreview()
     }
 }

@@ -1,5 +1,7 @@
 package com.daisy.foodorder.ui.screen
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +26,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -35,6 +38,7 @@ import com.daisy.foodorder.ui.component.BasketIconButton
 import com.daisy.foodorder.ui.component.MainTopAppBar
 import com.daisy.foodorder.ui.component.QuantitySelector
 import com.daisy.foodorder.ui.theme.FoodOrderTheme
+import com.daisy.foodorder.viewmodels.BasketViewModel
 import com.daisy.foodorder.viewmodels.ProductConfigurationViewModel
 
 @Composable
@@ -42,8 +46,12 @@ fun ProductConfigurationScreen(
     name: String,
     price: Float,
     onUpClick: () -> Unit,
+    onBasketClicked: () -> Unit,
+    orderViewModel: BasketViewModel,
     viewModel: ProductConfigurationViewModel = hiltViewModel()
 ) {
+    val context: Context = LocalContext.current
+
     LaunchedEffect(key1 = name) {
         viewModel.fetchDetails(name, price)
     }
@@ -59,10 +67,10 @@ fun ProductConfigurationScreen(
             MainTopAppBar(
                 title = "FoodOrder",
                 actions = {
-                    BasketIconButton { }
+                    BasketIconButton(onBasketClicked)
                 },
                 navigationAction = {
-                    BackIconButton { onUpClick() }
+                    BackIconButton(onUpClick)
                 })
         }
     ) {
@@ -87,10 +95,10 @@ fun ProductConfigurationScreen(
                         ExtraIngredientItem(
                             ingredient = ingredient,
                             onLessClicked = {
-                                viewModel.addLessIngredient(ingredient.id)
+                                viewModel.updateIngredientQuantity(ingredient.id, -1)
                             },
                             onMoreClicked = {
-                                viewModel.addMoreIngredient(ingredient.id)
+                                viewModel.updateIngredientQuantity(ingredient.id, 1)
                             })
                     }
                 }
@@ -98,12 +106,17 @@ fun ProductConfigurationScreen(
                 CheckoutSummaryBottomBar(
                     totalCost = totalCost,
                     quantity = productQuantity,
-                    onAddToCartClick = {},
+                    onAddToCartClick = {
+                        val product = viewModel.configuredProduct
+                        orderViewModel.addToOrder(product)
+                        Toast.makeText(context, "Added to cart", Toast.LENGTH_SHORT).show()
+                        onUpClick()
+                    },
                     onLessClicked = {
-                        viewModel.addLessProductQuantity()
+                        viewModel.updateProductQuantity(-1)
                     },
                     onMoreClicked = {
-                        viewModel.addMoreProductQuantity()
+                        viewModel.updateProductQuantity(1)
                     }
                 )
             }
@@ -139,7 +152,7 @@ fun ProductInfo(
             )
 
             Text(
-                text = "$${product.price}",
+                text = "$${product.originalPrice}",
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.primary
             )
